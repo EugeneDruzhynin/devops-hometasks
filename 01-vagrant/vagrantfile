@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
 
     SHELL
 
-    config.vm.provision "file", run: "always", source: "~/devops-hometasks/01-vagrant/index.html", destination: "/var/www/html/index.html"
-    config.vm.provision "file", run: "always", source: "~/devops-hometasks/01-vagrant/index.php", destination: "/var/www/php/index.php"
+    config.vm.provision "file", run: "always", source: "index.html", destination: "/var/www/html/index.html"
+    config.vm.provision "file", run: "always", source: "index.php", destination: "/var/www/php/index.php"
 
 end
