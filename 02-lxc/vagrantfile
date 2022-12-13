@@ -1,0 +1,31 @@
+Vagrant.configure("2") do |config|
+        config.vm.box = "debian/buster64"
+
+        config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+
+        config.vm.provider "virtualbox" do |vb|
+                vb.memory = "1024"
+                vb.name   = "lxc.vagrant.vm"
+        end
+
+        config.vm.provision "shell", inline: <<-SHELL
+                apt-get update
+                apt-get install -y -d lxc lxc-templates tree
+                sed -i "s/^#alias ll='ls -l'\$/alias ll='ls -la'/g" /home/vagrant/.bashrc
+                echo "alias ll='ls -l'" >> /root/.bashrc
+                apt-get install -y lxc
+                systemctl start lxc
+                echo "export DOWNLOAD_KEYSERVER="hkp://keyserver.ubuntu.com"" >> /root/.bashrc
+                echo "kernel.unprivileged_userns_clone = 1" >> /etc/sysctl.conf
+                sh -c "echo 'lxc.net.0.type = empty\nlxc.apparmor.profile = unconfined\nlxc.apparmor.allow_nesting = 1\nlxc.idmap = u 0 100000 65536\nlxc.idmap = g 0 100000 65536'" > /etc/lxc/default.conf
+                apt-get remove gnupg
+                apt-get install --reinstall gnupg2
+                apt-get install dirmngr
+                sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0 systemd.legacy_systemd_cgroup_controller=yes"/g' /etc/default/grub 
+                update-grub
+                lxc-create --name c1 --template download -- --no-validate --dist centos --release 9-Stream --arch amd64
+                lxc-create --name c2 --template download -- --no-validate --dist centos --release 9-Stream --arch amd64
+
+
+        SHELL
+end
