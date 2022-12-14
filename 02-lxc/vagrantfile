@@ -17,7 +17,10 @@ Vagrant.configure("2") do |config|
                 systemctl start lxc
                 echo "export DOWNLOAD_KEYSERVER="hkp://keyserver.ubuntu.com"" >> /root/.bashrc
                 echo "kernel.unprivileged_userns_clone = 1" >> /etc/sysctl.conf
-                sh -c "echo 'lxc.net.0.type = empty\nlxc.apparmor.profile = unconfined\nlxc.apparmor.allow_nesting = 1\nlxc.idmap = u 0 100000 65536\nlxc.idmap = g 0 100000 65536'" > /etc/lxc/default.conf
+                echo "vagrant veth lxcbr0 10" > /etc/lxc/lxc-usernet
+                sh -c "echo 'USE_LXC_BRIDGE="true"\nLXC_BRIDGE="lxcbr0"\nLXC_ADDR="10.0.3.1"\nLXC_NETMASK="255.255.255.0"\nLXC_NETWORK="10.0.3.0/24"\nLXC_DHCP_RANGE="10.0.3.2,10.0.3.254"\nLXC_DHCP_MAX="253"\nLXC_DHCP_CONFILE=""\nLXC_DOMAIN=""' >> /etc/default/lxc-net"
+                systemctl restart lxc-net
+                sh -c "echo 'lxc.net.0.type = empty\nlxc.apparmor.profile = unconfined\nlxc.apparmor.allow_nesting = 1\nlxc.start.auto = 1\nlxc.net.0.type = veth\nlxc.net.0.flags = up\nlxc.net.0.link = lxcbr0' > /etc/lxc/default.conf"
                 apt-get remove gnupg
                 apt-get install --reinstall gnupg2
                 apt-get install dirmngr
@@ -25,7 +28,6 @@ Vagrant.configure("2") do |config|
                 update-grub
                 lxc-create --name c1 --template download -- --no-validate --dist centos --release 9-Stream --arch amd64
                 lxc-create --name c2 --template download -- --no-validate --dist centos --release 9-Stream --arch amd64
-
 
         SHELL
 end
