@@ -29,6 +29,10 @@ Vagrant.configure("2") do |config|
                 apt-get install dirmngr
                 sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0 systemd.legacy_systemd_cgroup_controller=yes"/g' /etc/default/grub 
                 update-grub
-                
+                lxc-attach c1 -- dnf install httpd
+                lxc-attach c1 -- dnf start httpd
+                lxc-attach c1 -- curl -o /var/www/html/index.html https://raw.githubusercontent.com/Fenikks/devops-files/master/03-lxc/files/index.html
+                iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination 10.0.3.152:80
+
         SHELL
 end
