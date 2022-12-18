@@ -1,7 +1,9 @@
 Vagrant.configure("2") do |config|
         config.vm.box = "debian/buster64"
 
-        config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+        config.vm.network "forwarded_port", guest:80, host: 8080
+
+        config.vm.network "forwarded_port", guest:81, host: 8081
 
         config.vm.provider "virtualbox" do |vb|
                 vb.memory = "1024"
@@ -19,20 +21,47 @@ Vagrant.configure("2") do |config|
                 echo "kernel.unprivileged_userns_clone = 1" >> /etc/sysctl.conf
                 echo "vagrant veth lxcbr0 10" > /etc/lxc/lxc-usernet
                 sh -c "echo 'USE_LXC_BRIDGE="true"\nLXC_BRIDGE="lxcbr0"\nLXC_ADDR="10.0.3.1"\nLXC_NETMASK="255.255.255.0"\nLXC_NETWORK="10.0.3.0/24"\nLXC_DHCP_RANGE="10.0.3.2,10.0.3.254"\nLXC_DHCP_MAX="253"\nLXC_DHCP_CONFILE=""\nLXC_DOMAIN=""' >> /etc/default/lxc-net"
-                sh -c "echo 'lxc.net.0.type = empty\nlxc.apparmor.profile = unconfined\nlxc.apparmor.allow_nesting = 1\nlxc.start.auto = 1\nlxc.net.0.type = veth\nlxc.net.0.flags = up\nlxc.net.0.link = lxcbr0' > /etc/lxc/default.conf"
-                lxc-create --name c1 --template download -- --no-validate --dist centos --release 9-Stream --arch amd64
-                lxc-create --name c2 --template download -- --no-validate --dist centos --release 9-Stream --arch amd64
                 systemctl restart lxc-net
-                systemctl restart lxc
+                sh -c "echo 'lxc.net.0.type = veth\nlxc.apparmor.profile = unconfined\nlxc.apparmor.allow_nesting = 1\nlxc.start.auto = 1\nlxc.net.0.flags = up\nlxc.net.0.link = lxcbr0' > /etc/lxc/default.conf"
                 apt-get remove gnupg
                 apt-get install --reinstall gnupg2
                 apt-get install dirmngr
                 sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0 systemd.legacy_systemd_cgroup_controller=yes"/g' /etc/default/grub 
                 update-grub
-                lxc-attach c1 -- dnf install httpd
-                lxc-attach c1 -- dnf start httpd
+                lxc-create --name c1 --template download -- --no-validate --dist centos --release 9-Stream --arch amd64
+                lxc-create --name c2 --template download -- --no-validate --dist centos --release 9-Stream --arch amd64
+                systemctl restart lxc
+                                                                
+        SHELL
+
+        config.vm.provision "shell", inline: <<-SHELL
+                sleep 10
+                lxc-attach c1 -- dnf install -y httpd
+                lxc-attach c1 -- systemctl start httpd
+                lxc-attach c1 -- systemctl enable httpd
                 lxc-attach c1 -- curl -o /var/www/html/index.html https://raw.githubusercontent.com/Fenikks/devops-files/master/03-lxc/files/index.html
-                iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination 10.0.3.152:80
+                lxc-attach c2 -- dnf install -y httpd
+                lxc-attach c2 -- systemctl start httpd
+                lxc-attach c2 -- systemctl enable httpd
+                lxc-attach c2 -- dnf install https://rpms.remirepo.net/enterprise/remi-release-8.rpm -y
+                lxc-attach c2 -- dnf install epel-release -y
+                lxc-attach c2 -- dnf module enable php:remi-8.1 -y
+                lxc-attach c2 -- dnf install php -y
+                lxc-attach c2 -- chmod -R o=rwx /var/www/
+                lxc-attach c2 -- mkdir /var/www/php/
+                lxc-attach c2 -- chmod -R o+w /var/www/php/
+                lxc-attach c2 -- curl -o /var/www/php/index.php https://raw.githubusercontent.com/Fenikks/devops-files/master/03-lxc/files/index.php
+                lxc-attach c2 -- sh -c "echo 'Listen 81' >> /etc/httpd/conf/httpd.conf"
+                lxc-attach c2 -- sh -c "echo '<VirtualHost *:81>\nServerAdmin webmaster@localhost\nDocumentRoot /var/www/php\nErrorLog ${APACHE_LOG_DIR}/error.log\nCustomLog ${APACHE_LOG_DIR}/access.log combined\n</VirtualHost>' >> /etc/httpd/conf/httpd.conf"
+                lxc-attach c2 -- systemctl restart httpd
+                addr1=$(lxc-ls -f | awk '{print $5}' | awk '(NR == 2)')
+                addr2=$(lxc-ls -f | awk '{print $5}' | awk '(NR == 3)')
+                iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination $addr1:80
+                iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 81 -j DNAT --to-destination $addr2:81
+                echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
+                echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections
+                apt-get -y install iptables-persistent
 
         SHELL
+
 end
