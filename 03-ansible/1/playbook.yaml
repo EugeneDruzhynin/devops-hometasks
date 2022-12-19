@@ -8,3 +8,38 @@
     apt:
       name: apache2
       state: present
+
+  -name: Install PHP
+    become: yes
+    apt:
+      name: php7.0
+      state: present
+
+  -name: Changing perm of "/var/www/", adding "rwx"
+    file: dest=/var/www/ mode=o+rwx
+
+  -name: Create dir php/
+    file:
+      path: /var/www/php
+      state: directory 
+
+  -name: Changing perm of "/var/www/php/", adding "w"
+    file: dest=/var/www/php/ mode=o+w
+
+  -name: Add listen 81-th port
+    shell: echo 'Listen 81' >> /etc/apache2/ports.conf
+
+  -name: Modification 000-default.conf
+    shell: echo '<VirtualHost *:81>
+      ServerAdmin webmaster@localhost
+      DocumentRoot /var/www/php
+      ErrorLog ${APACHE_LOG_DIR}/error.log
+      CustomLog ${APACHE_LOG_DIR}/access.log combined
+      </VirtualHost>' >> /etc/apache2/sites-enabled/000-default.conf
+  -name: Restart apache
+    systemd:
+      name: apache2
+      state: restart    
+
+
+
