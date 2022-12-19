@@ -1,0 +1,10 @@
+---
+- name: H-tasks
+  hosts: all
+
+  tasks:
+  - name: Install Apache
+    become: yes
+    apt:
+      name: apache2
+      state: present
