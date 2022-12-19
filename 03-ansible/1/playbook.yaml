@@ -1,45 +1,78 @@
 ---
 - name: H-tasks
-  hosts: all
+  hosts: master
+  become: yes
 
   tasks:
-  - name: Install Apache
+
+  - name: Set alias ll
+    replace:
+      path: /home/vagrant/.bashrc
+      regexp: "^#alias ll='ls -l'$"
+      replace: "alias ll='ls -la'"
+
+  - name: install packages
     become: yes
+    apt:
+      pkg:
+      - vim
+      - mc
+      - sshpass
+      state: present
+
+  - name: Install Apache
     apt:
       name: apache2
       state: present
 
-  -name: Install PHP
-    become: yes
+  - name: Install PHP
     apt:
-      name: php7.0
+      name: php7.4
       state: present
+      
+  - name: Changing perm of "/var/www/", adding "rwx"
+    file:
+      path: /var/www
+      mode: 'o+w'  
 
-  -name: Changing perm of "/var/www/", adding "rwx"
-    file: dest=/var/www/ mode=o+rwx
-
-  -name: Create dir php/
+  - name: Create dir php/
     file:
       path: /var/www/php
       state: directory 
 
-  -name: Changing perm of "/var/www/php/", adding "w"
-    file: dest=/var/www/php/ mode=o+w
+  - name: Changing perm of "/var/www/php/", adding "w"
+    file:
+      path: /var/www/php
+      mode: 'o+w'
 
-  -name: Add listen 81-th port
+  - name: Add listen 81-th port
     shell: echo 'Listen 81' >> /etc/apache2/ports.conf
 
-  -name: Modification 000-default.conf
-    shell: echo '<VirtualHost *:81>
-      ServerAdmin webmaster@localhost
-      DocumentRoot /var/www/php
-      ErrorLog ${APACHE_LOG_DIR}/error.log
-      CustomLog ${APACHE_LOG_DIR}/access.log combined
-      </VirtualHost>' >> /etc/apache2/sites-enabled/000-default.conf
-  -name: Restart apache
-    systemd:
+  - name: Modification 000-default.conf
+    shell: sh -c "echo '<VirtualHost *:81>\n 
+      ServerAdmin webmaster@localhost\n
+      DocumentRoot /var/www/php\n
+      ErrorLog ${APACHE_LOG_DIR}/error.log\n
+      CustomLog ${APACHE_LOG_DIR}/access.log combined\n
+      </VirtualHost>' >> /etc/apache2/sites-enabled/000-default.conf"
+  
+  - name: CURL file html
+    shell: 'curl -o /var/www/html/index.html https://raw.githubusercontent.com/Fenikks/devops-files/master/03-lxc/files/index.html'
+    
+  - name: CURL file html
+    shell: 'curl -o /var/www/php/index.php https://raw.githubusercontent.com/Fenikks/devops-files/master/03-lxc/files/index.php'
+
+  - name: Reload service apache, in all cases
+    service:
       name: apache2
-      state: restart    
+      state: reloaded
+
+  - name: Enable service apache, and not touch the state
+    service:
+      name: apache2
+      enabled: yes    
+      
+
 
 
 
