@@ -1,0 +1,27 @@
+---
+- name: Master provision
+  hosts: master
+
+  tasks:
+
+  - name: install packages
+    become: yes
+    apt: 
+      pkg:
+      - puppetserver
+      - git
+      - sshpass
+      state: present
+
+- name: Slave's provision
+  hosts: 
+    - slave1
+    - slave2
+
+  tasks:
+    - name: install packages
+    become: yes
+    apt:
+      pkg:
+      - puppet-agent
+      state: present        
