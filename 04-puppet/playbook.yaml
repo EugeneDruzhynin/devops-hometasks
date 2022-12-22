@@ -1,4 +1,24 @@
 ---
+- name: general
+  hosts: 
+  - master
+  - slave1
+  - slave2
+  become: yes
+
+  tasks:
+
+  - name: Add Puppet Labs GPG key.
+    rpm_key:
+      key: https://yum.puppet.com/RPM-GPG-KEY-puppet-20250406
+      state: present
+
+  - name: install packages
+    yum:
+      name: https://yum.puppet.com/puppet7-release-el-8.noarch.rpm
+      state: present
+    become: true  
+
 - name: Master provision
   hosts: master
 
@@ -6,12 +26,12 @@
 
   - name: install packages
     become: yes
-    apt: 
+    yum: 
       pkg:
-      - puppetserver
       - git
       - sshpass
-      state: present
+      - puppetserver
+      state: latest
 
 - name: Slave's provision
   hosts: 
@@ -19,9 +39,10 @@
     - slave2
 
   tasks:
-    - name: install packages
+
+  - name: install packages
     become: yes
-    apt:
+    yum:
       pkg:
       - puppet-agent
       state: present        
