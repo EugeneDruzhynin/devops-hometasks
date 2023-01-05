@@ -1,0 +1,126 @@
+---
+- name: general
+  hosts: all
+  become: yes
+
+  tasks:
+
+  - name: Add Puppet Labs GPG key.
+    rpm_key:
+      key: https://yum.puppet.com/RPM-GPG-KEY-puppet-20250406
+      state: present
+
+  - name: install packages
+    yum:
+      name: https://yum.puppet.com/puppet7-release-el-8.noarch.rpm
+      state: present
+    become: true  
+
+- name: Master provision
+  become: yes
+  hosts: master.puppet
+
+  tasks:
+  - name: install packages
+    yum:
+      pkg:
+      - puppetserver
+      - git
+      state: present
+
+  - name: add a new string at the end of the file .bashrc
+    ansible.builtin.lineinfile: 
+      path: /root/.bashrc
+      line: 'export PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/ruby/bin:$PATH"'
+
+  - name: Memory
+    ansible.builtin.lineinfile:
+      path: /etc/sysconfig/puppetserver
+      regexp: '-Xms2'
+      insertafter: '^JAVA_ARGS="'
+      line: JAVA_ARGS="-Xms256m -Xmx256m -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger"
+
+  - name: Enable service puppetserver
+    service:
+      name: puppetserver
+      state: started
+
+  - name: Agent settings
+    ansible.builtin.blockinfile: 
+      dest: /etc/puppetlabs/puppet/puppet.conf
+      block: |
+        [agent]
+        server = master.puppet     
+
+  - name: Open firewall ports
+    ansible.posix.firewalld:
+      port: 8140/tcp
+      permanent: yes
+      state: enabled 
+
+  - name: Creating a file autosign.conf
+    copy:
+      dest: /etc/puppetlabs/puppet/autosign.conf
+      content: |
+        slave1.puppet
+        slave2.puppet
+
+  - name: install r10k    
+    command: /opt/puppetlabs/puppet/bin/gem install r10k
+
+  - name: Create a directory r10k
+    ansible.builtin.file:
+      path: /etc/puppetlabs/r10k
+      state: directory
+
+  - name: Creating a file r10k.yaml
+    copy:
+      dest: /etc/puppetlabs/r10k/r10k.yaml
+      content: |
+        :cachedir: '/var/cache/r10k'
+        :sources:
+          :my-org:
+            remote: 'https://github.com/EugeneDruzhynin/master-puppet.git'
+            basedir: '/etc/puppetlabs/code/environments'
+
+- name: Slave provision
+  become: yes
+  hosts: 
+    - slave1.puppet
+    - slave2.puppet
+
+  tasks:
+  - name: Install services
+    yum:  
+      pkg:
+      - puppet-agent
+      state: present
+
+  - name: Start services
+    service: 
+      name: puppet
+      state: started
+
+  - name: Enable password authentification
+    replace:
+      path: /etc/ssh/sshd_config
+      regexp: '^PasswordAuthentication no$'
+      replace: 'PasswordAuthentication yes'
+
+  - name: Restart sshd
+    service:
+      name: sshd
+      state: restarted    
+
+  - name: Agent settings
+    ansible.builtin.blockinfile: 
+      dest: /etc/puppetlabs/puppet/puppet.conf
+      block: |
+        [agent]
+        server = master.puppet
+        runinterval = 1m 
+
+  - name: Add hosts
+    ansible.builtin.lineinfile: 
+      path: /etc/hosts
+      line: '169.254.20.101 master.puppet'   
