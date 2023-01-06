@@ -1,0 +1,46 @@
+---
+- name: VM
+  hosts: master
+  become: yes
+
+  tasks:
+
+  - name: Set alias ll
+    replace:
+      path: /home/vagrant/.bashrc
+      regexp: "^#alias ll='ls -l'$"
+      replace: "alias ll='ls -la'"
+
+  - name: install packages
+    apt:
+      pkg:
+      - vim
+      - mc
+      - sshpass
+      - lxc
+      - lxc-templates tree
+      - python3
+      - python3-lxc
+      state: present
+
+  - name: Keyserver
+    shell: echo "export DOWNLOAD_KEYSERVER="hkp://keyserver.ubuntu.com"" >> /root/.bashrc
+
+  - name: Adding lbcbr0
+    shell: echo "vagrant veth lxcbr0 10" > /etc/lxc/lxc-usernet  
+
+  - name: lxcbr0 settings
+    shell: sh -c "echo 'USE_LXC_BRIDGE="true"\n
+      LXC_BRIDGE="lxcbr0"\n
+      LXC_ADDR="10.0.3.1"\n
+      LXC_NETMASK="255.255.255.0"\n
+      LXC_NETWORK="10.0.3.0/24"\n
+      LXC_DHCP_RANGE="10.0.3.2,10.0.3.254"\n
+      LXC_DHCP_MAX="253"\n
+      LXC_DHCP_CONFILE=""\n
+      LXC_DOMAIN=""' >> /etc/default/lxc-net"
+
+
+
+
+
