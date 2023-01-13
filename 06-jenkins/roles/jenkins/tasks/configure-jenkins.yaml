@@ -3,32 +3,11 @@
 # otherwise some data might be overwritten when it restarts.
 - include_tasks: "{{ jenkins_install_via }}/stop.yaml"
 
-- name: Set JENKINS_HOME
-  lineinfile:
-    create: true
-    dest: "/lib/systemd/system/jenkins.service"
-    line: "JENKINS_HOME={{ jenkins_home }}"
-    regexp: '^JENKINS_HOME='
-    state: present
-
-- name: Set Jenkins port for HTTP
-  lineinfile:
-    dest: /lib/systemd/system/jenkins.service
-    regexp: '^HTTP_PORT='
-    line: "HTTP_PORT={{ jenkins_port }}"
-
-- name: Set Jenkins port for HTTPS
-  lineinfile:
-    dest: /lib/systemd/system/jenkins.service
-    regexp: '^HTTPS_PORT='
-    insertafter: '^HTTP_PORT='
-    line: "HTTPS_PORT={{ jenkins_port_https }}"
-
 - name: Set Jenkins Java command line options
   lineinfile:
     dest: /lib/systemd/system/jenkins.service
-    regexp: '^JAVA_ARGS='
-    line: "JAVA_ARGS=\"{{ jenkins_java_opts }}\""
+    regexp: '^Environment="JAVA_OPTS=-Djava.awt.headless=true"'
+    line: 'Environment="JAVA_OPTS={{ jenkins_java_opts }}"'
 
 - name: Ensure correct ownership of JENKINS_HOME directory
   file:
@@ -37,3 +16,28 @@
     group: "{{ jenkins_config_group }}"
     mode: 0755
     state: directory
+
+- name: Initialize Jenkins secrets dir fact
+  set_fact:
+    jenkins_secrets: "{{ jenkins_home }}/secrets"
+
+- name: Copy secrets
+  copy:
+    src: "{{ jenkins_source_secrets }}"
+    dest: "{{ jenkins_secrets }}"
+    owner: "{{ jenkins_config_owner }}"
+    group: "{{ jenkins_config_group }}"
+  when: jenkins_include_secrets
+
+- name: Ensure correct ownership of secrets directory
+  file:
+    path: "{{ jenkins_secrets }}"
+    owner: "{{ jenkins_config_owner }}"
+    group: "{{ jenkins_config_group }}"
+    mode: 0700
+    state: directory
+
+- name: Copy users config file
+  copy:
+    src: "{{ jenkins_config_via }}"
+    dest: "{{ jenkins_home }}"

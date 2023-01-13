@@ -6,13 +6,13 @@
 #- include: "configure-files.yml"
 #  when: jenkins_include_custom_files
 
-#- include: "configure-plugins.yml"
+- include: "configure-plugins.yaml"
 
 #- include: "configure-jobs.yml"
 
 #- include: "{{ jenkins_after_config_jobs_file }}"
 #  when: jenkins_after_config_jobs_file | length > 0
 
-- include: "{{ jenkins_install_via }}/start.yaml"
+#- include: "{{ jenkins_install_via }}/start.yaml"
 
 #- include: "cancel-quiet-mode.yml"
