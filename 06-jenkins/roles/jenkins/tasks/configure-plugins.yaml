@@ -4,6 +4,7 @@
     name=jenkins
     state=restarted
     enabled=yes
+
 - name: Wait for Jenkins to start up
   uri:
     url: http://localhost:8080
@@ -32,8 +33,8 @@
   with_items:
     - locale
     - golang
-    - github-branch-source
-    - git
+    - github-branch-source:1696.v3a_7603564d04
+    - git:5.0.0
   when: jenkins_service_status['status'] == 200
  
 - name: Copy go-plugins config file

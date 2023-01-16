@@ -8,7 +8,7 @@
 
 - include: "configure-plugins.yaml"
 
-#- include: "configure-jobs.yml"
+- include: "configure-jobs.yaml"
 
 #- include: "{{ jenkins_after_config_jobs_file }}"
 #  when: jenkins_after_config_jobs_file | length > 0
