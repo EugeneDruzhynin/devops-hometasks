@@ -34,7 +34,9 @@
     - locale
     - golang
     - github-branch-source:1696.v3a_7603564d04
-    - git:5.0.0
+    - git
+    - workflow-multibranch
+    - nexus-artifact-uploader
   when: jenkins_service_status['status'] == 200
  
 - name: Copy go-plugins config file

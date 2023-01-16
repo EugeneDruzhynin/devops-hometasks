@@ -1,14 +1,21 @@
 ---
-- name: Install python3-jenkins
-  become: yes
-  apt:
-    name: python3-jenkins
-    state: present
+- name: Create job's directory
+  ansible.builtin.file:
+    path: "{{ jenkins_home }}/jobs/gobuild"
+    state: directory
+    owner: "{{ jenkins_config_owner }}"
+    group: "{{ jenkins_config_group }}"
+    mode: 0755
 
-- name: Create a jenkins job using basic authentication
-  community.general.jenkins_job:
-    config: "{{ lookup('file', '{{ jenkins_jobs_via }}/config.xml') }}"
-    name: gobild
-    password: $token
-    url: http://localhost:8080
-    user: admin
+- name: Copy job's .xml file
+  ansible.builtin.copy:
+    src: "{{ jenkins_jobs_via }}/config.xml"
+    dest: "{{ jenkins_home }}/jobs/gobuild/config.xml"
+    owner: "{{ jenkins_config_owner }}"
+    group: "{{ jenkins_config_group }}"
+    mode: 0644
+
+- name: Jenkins reload
+  ansible.builtin.systemd:
+    name: jenkins.service
+    state: restarted            

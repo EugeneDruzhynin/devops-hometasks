@@ -1,6 +1,4 @@
 ---
-# Jenkins should not be running while we write configuration files, otherwise
-# otherwise some data might be overwritten when it restarts.
 - include_tasks: "{{ jenkins_install_via }}/stop.yaml"
 
 - name: Set Jenkins Java command line options
