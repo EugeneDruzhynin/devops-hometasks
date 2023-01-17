@@ -1,7 +1,7 @@
 ---
   - name: Download Jenkins
     apt_key:
-        url: "{{ jenkins.repo_URL }}"
+        url: "https://pkg.jenkins.io/debian-stable/jenkins.io.key"
         state: present
     become: yes
 
@@ -16,7 +16,7 @@
 
   - name: Install java
     apt:
-      name: "{{ java }}"
+      name: "openjdk-11-jdk"
       state: present
 
   - name: Install Jenkins
