@@ -30,13 +30,14 @@
     url_username: "admin"
     url_password: "admin"
     state: present
+    timeout: 120
   with_items:
+    - git
     - locale
     - golang
-    - github-branch-source:1696.v3a_7603564d04
-    - git
-    - workflow-multibranch
+    - github-branch-source
     - nexus-artifact-uploader
+    - workflow-multibranch
   when: jenkins_service_status['status'] == 200
  
 - name: Copy go-plugins config file
@@ -50,7 +51,6 @@
     dest: "{{ jenkins_home }}/locale.xml"
 
 - name: reload systemd
-  become: yes
   command: systemctl daemon-reload        
 
 - name: Jenkins reload
