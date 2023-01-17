@@ -1,4 +1,7 @@
-jenkins  ansible_host=127.0.0.1 ansible_connection=local
+jenkins     ansible_host=127.0.0.1 ansible_connection=local
+nexus       ansible_host="10.0.100.101"
+staging     ansible_host="10.0.100.102"
+production  ansible_host="10.0.100.103"
 
 [all:vars]
 ansible_connection=ssh
