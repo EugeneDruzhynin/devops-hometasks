@@ -66,5 +66,5 @@
 
     - name: Create service
       ansible.builtin.copy:
-      src: "{{jenkins_slaves_via}}/wordcloud.service"
-      dest: "/etc/systemd/system/wordcloud.service"
+        src: "roles/jenkins/files/slaves/wordcloud.service"
+        dest: "/etc/systemd/system/wordcloud.service"
