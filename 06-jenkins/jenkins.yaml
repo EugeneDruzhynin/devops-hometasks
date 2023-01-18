@@ -48,10 +48,15 @@
           write_policy: allow_once
           blob_store: default
 
+  - name: Install jq
+    apt:
+      name: jq
+      state: present     
+
 - name: Slave's manage
   hosts:
     - staging
-    - provision
+    - production
   become: yes
 
   tasks:
