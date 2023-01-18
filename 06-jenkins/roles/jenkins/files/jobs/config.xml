@@ -80,11 +80,31 @@ ls -l artifacts</command>
       </artifacts>
       <credentialsId>slave_password</credentialsId>
     </sp.sd.nexusartifactuploader.NexusArtifactUploader>
+    <org.jvnet.hudson.plugins.SSHBuilder plugin="ssh@2.6.1">
+      <siteName>vagrant@10.0.100.102:22</siteName>
+      <command>sudo systemctl stop wordcloud
+
+curl -X GET http://10.0.100.101:8081/repository/word-cloud-build/${BRANCH}/word-cloud-generator/1.${BUILD_NUMBER}/word-cloud-generator-1.${BUILD_NUMBER}.gz --user ${NEXUS_USER}:${NEXUS_PASSWORD} -o /opt/wordcloud/word-cloud-generator.gz
+
+gunzip -f /opt/wordcloud/word-cloud-generator.gz
+
+chmod +x /opt/wordcloud/word-cloud-generator
+
+sudo systemctl start wordcloud</command>
+      <execEachLine>false</execEachLine>
+      <hideCommand>false</hideCommand>
+    </org.jvnet.hudson.plugins.SSHBuilder>
   </builders>
   <publishers/>
   <buildWrappers>
     <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@523.vd859a_4b_122e6">
-      <bindings class="empty-list"/>
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>nexus_password</credentialsId>
+          <usernameVariable>NEXUS_USER</usernameVariable>
+          <passwordVariable>NEXUS_PASSWORD</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
     </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
     <org.jenkinsci.plugins.golang.GolangBuildWrapper plugin="golang@1.4">
       <goVersion>go 1.16</goVersion>
