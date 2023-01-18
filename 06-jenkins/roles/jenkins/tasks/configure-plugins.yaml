@@ -38,6 +38,7 @@
     - github-branch-source
     - nexus-artifact-uploader
     - workflow-multibranch
+    - ssh
   when: jenkins_service_status['status'] == 200
  
 - name: Copy go-plugins config file
@@ -49,6 +50,11 @@
   copy:
     src: "{{ jenkins_plugins_via }}/locale.xml"
     dest: "{{ jenkins_home }}/locale.xml"
+
+- name: Copy locale-plugins config file
+  copy:
+    src: "{{ jenkins_plugins_via }}/ssh.xml"
+    dest: "{{ jenkins_home }}/org.jvnet.hudson.plugins.SSHBuildWrapper.xml"
 
 - name: reload systemd
   command: systemctl daemon-reload        

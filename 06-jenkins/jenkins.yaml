@@ -47,3 +47,24 @@
           version_policy: release
           write_policy: allow_once
           blob_store: default
+
+- name: Slave's manage
+  hosts:
+    - staging
+    - provision
+  become: yes
+
+  tasks:
+
+    - name: Create dir for service
+      ansible.builtin.file:
+        path: "/opt/wordcloud/"
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: 0755
+
+    - name: Create service
+      ansible.builtin.copy:
+      src: "{{jenkins_slaves_via}}/wordcloud.service"
+      dest: "/etc/systemd/system/wordcloud.service"
