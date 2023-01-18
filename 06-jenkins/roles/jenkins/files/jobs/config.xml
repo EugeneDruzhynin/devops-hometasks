@@ -55,11 +55,28 @@ go get github.com/GeertJohan/go.rice/rice
 go get github.com/wickett/word-cloud-generator/wordyapi
 go get github.com/gorilla/mux
 
-sed -i &quot;s/1.DEVELOPMENT/1.${BUILD_NUMBER}.${BRANCH}/g&quot; static/version
+sed -i &quot;s/1.DEVELOPMENT/1.${BUILD_NUMBER}/g&quot; static/version
 
 GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v </command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
+    <sp.sd.nexusartifactuploader.NexusArtifactUploader plugin="nexus-artifact-uploader@2.14">
+      <nexusVersion>nexus3</nexusVersion>
+      <protocol>http</protocol>
+      <nexusUrl>http://10.0.100.101:8081/</nexusUrl>
+      <groupId>1</groupId>
+      <version>1.${BUILD_NUMBER}</version>
+      <repository>word-cloud-build</repository>
+      <artifacts>
+        <sp.sd.nexusartifactuploader.Artifact>
+          <artifactId>word-cloud-generator</artifactId>
+          <type>gz</type>
+          <classifier></classifier>
+          <file>./artifacts/word-cloud-generator</file>
+        </sp.sd.nexusartifactuploader.Artifact>
+      </artifacts>
+      <credentialsId>slave_password</credentialsId>
+    </sp.sd.nexusartifactuploader.NexusArtifactUploader>
   </builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>

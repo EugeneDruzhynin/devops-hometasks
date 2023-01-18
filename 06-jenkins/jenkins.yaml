@@ -35,8 +35,8 @@
       nexus_delete_default_repos: True
       nexus_local_users:
         - username: uploader
-          first_name: Jenkins
-          last_name: CI
+          first_name: Nexus
+          last_name: Uploader
           email: jenkins@gmail.com
           password: "uploader"
           roles:
