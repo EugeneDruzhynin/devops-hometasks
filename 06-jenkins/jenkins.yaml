@@ -5,6 +5,13 @@
   roles:
     - jenkins
 
+  tasks:
+  - name: Install jq
+    apt:
+      name: jq
+      state: present     
+
+
 - name: Manage Nexus
   hosts: nexus
   become: yes
@@ -47,11 +54,6 @@
           version_policy: release
           write_policy: allow_once
           blob_store: default
-
-  - name: Install jq
-    apt:
-      name: jq
-      state: present     
 
 - name: Slave's manage
   hosts:
