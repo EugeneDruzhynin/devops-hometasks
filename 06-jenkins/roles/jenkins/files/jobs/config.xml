@@ -66,7 +66,7 @@ ls -l artifacts</command>
     <sp.sd.nexusartifactuploader.NexusArtifactUploader plugin="nexus-artifact-uploader@2.14">
       <nexusVersion>nexus3</nexusVersion>
       <protocol>http</protocol>
-      <nexusUrl>10.0.100.101:8081/</nexusUrl>
+      <nexusUrl>10.0.100.101:8081</nexusUrl>
       <groupId>$BRANCH</groupId>
       <version>1.${BUILD_NUMBER}</version>
       <repository>word-cloud-build</repository>
@@ -78,7 +78,7 @@ ls -l artifacts</command>
           <file>./artifacts/word-cloud-generator.gz</file>
         </sp.sd.nexusartifactuploader.Artifact>
       </artifacts>
-      <credentialsId>slave_password</credentialsId>
+      <credentialsId>nexus_password</credentialsId>
     </sp.sd.nexusartifactuploader.NexusArtifactUploader>
     <org.jvnet.hudson.plugins.SSHBuilder plugin="ssh@2.6.1">
       <siteName>vagrant@10.0.100.102:22</siteName>
@@ -95,7 +95,8 @@ sudo systemctl start wordcloud</command>
       <hideCommand>true</hideCommand>
     </org.jvnet.hudson.plugins.SSHBuilder>
     <hudson.tasks.Shell>
-      <command>res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a really really really important thing this is&quot;}&apos; http://10.0.100.102:8888/version | jq &apos;. | length&apos;`
+      <command>res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a 
+really really really important thing this is&quot;}&apos; http://10.0.100.102:8888/version | jq &apos;. | length&apos;`
 if [ &quot;1&quot; != &quot;$res&quot; ]; then
   exit 99
 fi
