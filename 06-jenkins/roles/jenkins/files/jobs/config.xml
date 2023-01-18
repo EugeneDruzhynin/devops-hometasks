@@ -31,7 +31,7 @@
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>*/master</name>
+        <name>*/$BRANCH</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
@@ -57,14 +57,17 @@ go get github.com/gorilla/mux
 
 sed -i &quot;s/1.DEVELOPMENT/1.${BUILD_NUMBER}/g&quot; static/version
 
-GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v </command>
+GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v
+
+gzip -f artifacts/word-cloud-generator
+ls -l artifacts</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
     <sp.sd.nexusartifactuploader.NexusArtifactUploader plugin="nexus-artifact-uploader@2.14">
       <nexusVersion>nexus3</nexusVersion>
       <protocol>http</protocol>
-      <nexusUrl>http://10.0.100.101:8081/</nexusUrl>
-      <groupId>1</groupId>
+      <nexusUrl>10.0.100.101:8081/</nexusUrl>
+      <groupId>$BRANCH</groupId>
       <version>1.${BUILD_NUMBER}</version>
       <repository>word-cloud-build</repository>
       <artifacts>
@@ -72,24 +75,17 @@ GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v </comman
           <artifactId>word-cloud-generator</artifactId>
           <type>gz</type>
           <classifier></classifier>
-          <file>./artifacts/word-cloud-generator</file>
+          <file>./artifacts/word-cloud-generator.gz</file>
         </sp.sd.nexusartifactuploader.Artifact>
       </artifacts>
       <credentialsId>slave_password</credentialsId>
     </sp.sd.nexusartifactuploader.NexusArtifactUploader>
   </builders>
-  <publishers>
-    <hudson.tasks.ArtifactArchiver>
-      <artifacts>artifacts/word-cloud-generator</artifacts>
-      <allowEmptyArchive>false</allowEmptyArchive>
-      <onlyIfSuccessful>false</onlyIfSuccessful>
-      <fingerprint>false</fingerprint>
-      <defaultExcludes>true</defaultExcludes>
-      <caseSensitive>true</caseSensitive>
-      <followSymlinks>false</followSymlinks>
-    </hudson.tasks.ArtifactArchiver>
-  </publishers>
+  <publishers/>
   <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@523.vd859a_4b_122e6">
+      <bindings class="empty-list"/>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
     <org.jenkinsci.plugins.golang.GolangBuildWrapper plugin="golang@1.4">
       <goVersion>go 1.16</goVersion>
     </org.jenkinsci.plugins.golang.GolangBuildWrapper>
