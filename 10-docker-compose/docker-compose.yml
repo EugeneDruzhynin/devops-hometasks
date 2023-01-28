@@ -1,0 +1,15 @@
+version: "2"
+services:
+  Jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile1
+    ports:
+     - "80:80"
+    depends_on:
+    - Nexus 
+
+  Nexus:
+    build: ./Dockerfile2
+    ports:
+      - "81:81"
