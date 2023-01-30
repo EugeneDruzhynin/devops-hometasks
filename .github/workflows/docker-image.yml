@@ -11,4 +11,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: "echo 'pwd'"
+      run: docker build . --file Dockerfile.multi --tag my-image-name:wcg
