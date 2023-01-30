@@ -6,9 +6,9 @@ jobs:
 
   build:
 
-    runs-on: self-hosted
-
+    runs-on: ubuntu-20.04
+    
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile.multi --tag my-image-name:wcg
+      run: docker build . --file /11-github-actions/Dockerfile.multi --tag my-image-name:wcg
