@@ -20,4 +20,4 @@ jobs:
         password: ${{ secrets.ACTION_TOKEN }}
     - name: Push Docker image
       run: |
-        docker push ghcr.io/${{ ACTION_REPO }}:latest
+            docker push ghcr.io/${{ ACTION_REPO }}:latest
