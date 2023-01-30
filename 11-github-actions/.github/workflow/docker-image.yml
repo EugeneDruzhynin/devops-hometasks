@@ -6,9 +6,9 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:wcg
+      run: docker build . --file Dockerfile.multi --tag my-image-name:wcg
