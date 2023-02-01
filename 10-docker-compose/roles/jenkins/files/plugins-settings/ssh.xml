@@ -5,7 +5,7 @@
       <hostname>10.0.100.102</hostname>
       <username>vagrant</username>
       <port>22</port>
-      <credentialId>slaves_password</credentialId>
+      <credentialId>slave_password</credentialId>
       <serverAliveInterval>0</serverAliveInterval>
       <timeout>0</timeout>
       <pty>false</pty>
@@ -14,7 +14,7 @@
       <hostname>10.0.100.103</hostname>
       <username>vagrant</username>
       <port>22</port>
-      <credentialId>slaves_password</credentialId>
+      <credentialId>slave_password</credentialId>
       <serverAliveInterval>0</serverAliveInterval>
       <timeout>0</timeout>
       <pty>false</pty>
