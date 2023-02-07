@@ -24,4 +24,4 @@ jobs:
       run: |
         repository_owner=${{ github.REPOSITORY_OWNER }}
         lower_repository_owner=$(echo "${${{ repository_owner }},,}" )
-        docker push ghcr.io/${{ github.REPOSITORY_OWNER }}:latest
+        docker push ghcr.io/${{ github.lower_repository_owner }}:latest
