@@ -5,7 +5,8 @@ on: workflow_dispatch
 jobs:
 
   build:
-
+    env:
+      repository_owner=${{ github.REPOSITORY_OWNER }}
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +23,5 @@ jobs:
         
     - name: Push Docker image
       run: |
-        repository_owner=${{ github.REPOSITORY_OWNER }}
         lower_repository_owner=$(echo "${${{ repository_owner }},,}" )
         docker push ghcr.io/${{ lower_repository_owner }}:latest
