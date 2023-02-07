@@ -20,8 +20,12 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.ACTION_TOKEN }}
         
+    - name: set lower case owner name
+      run: |
+        echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+      env:
+        OWNER: '${{ github.repository_owner }}'    
+        
     - name: Push Docker image
       run: |
-        repository_owner=${{github.repository_owner}}
-        lower_repository_owner=$(echo "$repository_owner" | tr '[:upper:]' '[:lower:]')
-        docker push ghcr.io/${{ lower_repository_owner }}:latest
+        docker push ghcr.io/${{ OWNER_LC }}:latest
