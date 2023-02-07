@@ -21,6 +21,8 @@ jobs:
         password: ${{ secrets.ACTION_TOKEN }}
         
     - name: Push Docker image
+      env:
+        lower_repository_owner: ${{github.repository_owner}}
       run: |
         lower_repository_owner=$(echo "$github.repository_owner" | tr '[:upper:]' '[:lower:]')
         docker push ghcr.io/${{ lower_repository_owner }}:latest
