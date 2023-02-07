@@ -19,6 +19,6 @@ jobs:
         echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}       
     - name: Push Docker image
       run: |
-        docker build -t ghcr.io/${{ env.OWNER_LC }}/wcg:${{ github.sha }} -t  ghcr.io/${{ env.OWNER_LC }}/wcg:latest --file ./09-docker/Dockerfile.multi . .
+        docker build -t ghcr.io/${{ env.OWNER_LC }}/wcg:${{ github.sha }} -t  ghcr.io/${{ env.OWNER_LC }}/wcg:latest --file ./09-docker/Dockerfile.multi .
         docker push ghcr.io/${OWNER_LC}/wcg:${{ github.sha }}
         docker push ghcr.io/${OWNER_LC}/wcg:latest
