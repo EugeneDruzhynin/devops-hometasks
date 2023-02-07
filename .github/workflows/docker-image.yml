@@ -27,4 +27,4 @@ jobs:
         
     - name: Push Docker image
       run: |
-        docker push ghcr.io/${{ OWNER_LC }}:latest
+        docker push ghcr.io/${{ env.OWNER_LC }}:latest
