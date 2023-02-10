@@ -1,0 +1,25 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: wcg
+  name: wcg
+  namespace: eugene-wcg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wcg
+  template:
+    metadata:
+      labels:
+        app: wcg
+    spec:
+      imagePullSecrets:
+        - name: github-pull-secret
+      containers:
+      - image: ghcr.io/eugenedruzhynin/wcg:3fd2fc0d26c6ed48b3e7124b36aae9d5436fbe6b
+        name: wcg
+        imagePullPolicy: Always
+        resources: {}

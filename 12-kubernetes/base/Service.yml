@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wcg
+  namespace: eugene-wcg
+spec:
+  selector:
+    app: wcg
+  ports:
+  - name: http
+    port: 8888

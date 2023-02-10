@@ -1,0 +1,5 @@
+resources:
+- Namespace.yml
+- Deployment.yml
+- Service.yml
+- Ingress.yml
