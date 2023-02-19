@@ -1,0 +1,20 @@
+FROM debian:11.6
+
+RUN apt-get update\
+    && apt-get install --no-install-recommends -y python3-pip git gnupg rsync \
+    && pip install ansible jmespath \
+    && apt-get clean \
+    && apt-get install -y openjdk-17-jre
+
+COPY . /ansible/playbooks/
+#COPY /roles /ansible/playbooks/roles  
+RUN ansible-playbook -i /ansible/playbooks/inventory /ansible/playbooks/nexus.yml
+
+#USER jenkins
+#WORKDIR /var/lib/jenkins
+
+#ENV JENKINS_HOME=/var/lib/jenkins
+#ENV LANG C.UTF-8
+#ENV LC_ALL C.UTF-8
+
+CMD /etc/init.d/nexus run 

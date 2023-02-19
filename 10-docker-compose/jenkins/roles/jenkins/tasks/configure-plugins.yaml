@@ -1,0 +1,46 @@
+---
+- name: Copy go-plugins config file
+  copy:
+    src: "{{ jenkins_plugins_via }}/go.xml"
+    dest: "{{ jenkins_home }}/org.jenkinsci.plugins.golang.GolangBuildWrapper.xml"
+
+- name: Copy locale-plugins config file
+  copy:
+    src: "{{ jenkins_plugins_via }}/locale.xml"
+    dest: "{{ jenkins_home }}/locale.xml"
+
+- name: Copy ssh config file
+  copy:
+    src: "{{ jenkins_plugins_via }}/ssh.xml"
+    dest: "{{ jenkins_home }}/org.jvnet.hudson.plugins.SSHBuildWrapper.xml"
+
+- name: Jenkins start
+  service:
+    name: jenkins
+    state: started       
+
+- name: Pause for 5 minutes to build app cache
+  ansible.builtin.pause:
+    minutes: 5
+
+- name: Install Jenkins plugins
+  jenkins_plugin:
+    name: "{{ item }}"
+    url_username: "admin"
+    url_password: "admin"
+    state: present
+    timeout: 300
+    with_dependencies: yes
+  with_items:
+    - git
+    - locale
+    - golang
+    - github-branch-source
+    - github
+    - nexus-artifact-uploader
+    - workflow-multibranch
+    - ssh
+    - ssh-credentials
+    - credentials
+    - credentials-binding
+    - pipeline

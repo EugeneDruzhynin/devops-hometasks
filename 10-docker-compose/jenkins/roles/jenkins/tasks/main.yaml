@@ -1,0 +1,10 @@
+---     
+- include_tasks: "{{ jenkins_install_via }}/install.yaml"
+
+- include_tasks: "configure-jenkins.yaml"
+
+- include_tasks: "configure-plugins.yaml"
+
+- include_tasks: "configure-jobs.yaml"
+
+- include_tasks: "create-credentials.yaml"
