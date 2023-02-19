@@ -1,7 +1,0 @@
-FROM debian:11.6
-RUN apt-get update && apt-get install -y ansible
-RUN apt-get install -y sshpass && apt-get install gnupg -y
-COPY /roles /ansible/playbooks/roles
-COPY inventory /ansible/
-COPY jenkins.yaml /ansible/playbooks/
-CMD ansible-playbook -l nexus /ansible/playbooks/jenkins.yaml -i /ansible/inventory

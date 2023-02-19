@@ -1,15 +1,22 @@
-version: "2"
+version: '3'
 services:
-  Jenkins:
+  jenkins:
+    container_name: jenkins
     build:
-      context: .
-      dockerfile: Dockerfile1
+      context: ./jenkins
+      dockerfile: dockerfile-jenkins
     ports:
-     - "80:80"
-    depends_on:
-    - Nexus 
-
-  Nexus:
-    build: ./Dockerfile2
+      - 80:8080
+    networks:
+      - hw-10
+  nexus:
+    container_name: nexus
+    build:
+      context: ./nexus
+      dockerfile: dockerfile-nexus
     ports:
-      - "81:81"
+      - 81:8081
+    networks:
+      - hw-10
+networks:
+  hw-10: 
