@@ -1,0 +1,31 @@
+---
+#- name: Ensure jenkins_init_folder exists.
+#  ansible.builtin.file:
+#    path: /etc/systemd/system/jenkins.service.d/
+#    state: directory
+#    mode: 0644
+
+#- name: Ensure jenkins_init_file exists.
+#  ansible.builtin.file:
+#    path: /etc/systemd/system/jenkins.service.d/override.conf
+#    state: touch
+#    mode: 0644
+
+- name: Modify variables in jenkins init file.
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: '^JAVA_ARGS='
+    value: 'JAVA_ARGS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"'
+    
+- name: Ensure correct ownership of JENKINS_HOME directory
+  file:
+    path: "{{ jenkins_home }}"
+    owner: "{{ jenkins_config_owner }}"
+    group: "{{ jenkins_config_group }}"
+    mode: 0755
+    state: directory
+
+- name: Copy users config file
+  copy:
+    src: "{{ jenkins_config_via }}"
+    dest: "{{ jenkins_home }}"

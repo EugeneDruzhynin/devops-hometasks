@@ -1,0 +1,36 @@
+---
+- name: Manage Nexus
+  hosts: localhost
+  connection: local
+  become: yes
+
+  tasks:
+
+  - name: Install apt
+    apt:
+      pkg:
+      - software-properties-common
+      - rsync
+      - gnupg2
+      state: present
+      update_cache: yes  
+
+  - name: Add key
+    apt_key:
+      url: https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
+
+
+  - name: Add repository
+    apt_repository:
+      repo: deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main
+      state: present
+      update_cache: true
+
+  - name: Install Java
+    apt:
+      name: adoptopenjdk-8-hotspot
+      state: present
+
+  - name: Install and config Nexus
+    include_role:
+      name: ansible-thoteam.nexus3-oss

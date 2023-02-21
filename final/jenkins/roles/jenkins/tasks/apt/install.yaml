@@ -1,0 +1,26 @@
+---
+  - name: Apt Jenkins key
+    apt_key:
+        url: "https://pkg.jenkins.io/debian-stable/jenkins.io.key"
+        state: present
+    become: yes
+
+  - name: ensure the repository is configured
+    apt_repository: repo='deb https://pkg.jenkins.io/debian-stable binary/' state=present
+    become: yes
+
+  - name: Install Jenkins
+    apt:
+      name: jenkins
+      state: latest
+      update_cache: yes
+
+  - name: Install java
+    apt:
+      name: "openjdk-11-jdk"
+      state: present
+
+  - name: Jenkins stop
+    service:
+      name: jenkins
+      state: stopped        
