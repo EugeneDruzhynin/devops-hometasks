@@ -55,70 +55,30 @@ pipeline {
                 )
             }
         }
-        stage ('Post test') {
-            stages {
-                stage ('deploy on staging'){
-                    environment{
-                        SSH_CREDS = credentials('slave_password')
-                    }
-                    steps {
-                        withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                            sh '''
-                            sshpass -p ${SSH_CREDS_PSW} ssh ${SSH_CREDS_PSW}@${STAGE_IP} -o StrictHostKeyChecking=no "sudo systemctl stop wordcloud" 
-                            sshpass -p ${SSH_CREDS_PSW} ssh ${SSH_CREDS_PSW}@${STAGE_IP} "curl -X GET http://${NEXUS_IP}:8081/repository/${NEXUS_REPO}/${BRANCH}/word-cloud-generator/1.${BUILD_NUMBER}/word-cloud-generator-1.${BUILD_NUMBER}.gz --user ${NEXUS_USER}:${NEXUS_PASSWORD} -o /opt/wordcloud/word-cloud-generator.gz"
-                            sshpass -p ${SSH_CREDS_PSW} ssh ${SSH_CREDS_PSW}@${STAGE_IP} "gunzip -f /opt/wordcloud/word-cloud-generator.gz;chmod +x /opt/wordcloud/word-cloud-generator; sudo systemctl start wordcloud"
-                            '''
-                        }    
-                    }
+        stage ('Upload for testing') {
+            agent {
+                dockerfile {
+                    filename 'dockerfile-alpine'
                 }
-                stage('parallel testing') {
-                    parallel {
-                        stage('stage 1'){
-                            steps{
-                                sh '''res=`curl -s -H "Content-Type: application/json" -d '{"text":"ths is a really really really important thing this is"}' http://${STAGE_IP}:8888/version | jq '. | length'`
-                                    if [ "1" != "$res" ]; then
-                                    exit 99
-                                    fi
-                                                
-                                    res=`curl -s -H "Content-Type: application/json" -d '{"text":"ths is a really really really important thing this is"}' http://${STAGE_IP}:8888/api | jq '. | length'`
-                                    if [ "7" != "$res" ]; then
-                                    exit 99
-                                    fi'''
-                            }
-                        }
-                        stage('stage 2'){
-                            steps{
-                                sh '''res=`curl -s -H "Content-Type: application/json" -d '{"text":"ths is a really really really important thing this is"}' http://${STAGE_IP}:8888/version | jq '. | length'`
-                                    if [ "1" != "$res" ]; then
-                                    exit 99
-                                    fi
-                                                
-                                    res=`curl -s -H "Content-Type: application/json" -d '{"text":"ths is a really really really important thing this is"}' http://${STAGE_IP}:8888/api | jq '. | length'`
-                                    if [ "7" != "$res" ]; then
-                                    exit 99
-                                    fi'''
-                            }
-                        }
-                    }
-                }
-            }
-        }        
-        stage ('deploy on production'){
-            environment{
-                SSH_CREDS = credentials('slave_password')
-            }
+            }    
             steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'nexus_password', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
                     sh '''
-                    sshpass -p ${SSH_CREDS_PSW} ssh ${SSH_CREDS_PSW}@${PROD_IP} -o StrictHostKeyChecking=no "sudo systemctl stop wordcloud" 
-                    sshpass -p ${SSH_CREDS_PSW} ssh ${SSH_CREDS_PSW}@${PROD_IP} "curl -X GET http://${NEXUS_IP}:8081/repository/${NEXUS_REPO}/${BRANCH}/word-cloud-generator/1.${BUILD_NUMBER}/word-cloud-generator-1.${BUILD_NUMBER}.gz --user ${NEXUS_USER}:${NEXUS_PASSWORD} -o /opt/wordcloud/word-cloud-generator.gz"
-                    sshpass -p ${SSH_CREDS_PSW} ssh ${SSH_CREDS_PSW}@${PROD_IP} "gunzip -f /opt/wordcloud/word-cloud-generator.gz;chmod +x /opt/wordcloud/word-cloud-generator; sudo systemctl start wordcloud"
-                    '''
+                        curl -u ${NEXUS_USER}:${NEXUS_PASSWORD} -X GET "http://localhost:8081/repository/${NEXUS_REPO}/${BRANCH}/word-cloud-generator/1.${BUILD_NUMBER}/word-cloud-generator-1.${BUILD_NUMBER}.gz"  -o /opt/wordcloud/word-cloud-generator.gz"
+                        gunzip -f /opt/wordcloud/word-cloud-generator.gz;chmod +x /opt/wordcloud/word-cloud-generator; sudo systemctl start wordcloud
+                        sleep 10
+
+                        res=`curl -s -H "Content-Type: application/json" -d '{"text":"ths is a really really really important thing this is"}' http://${STAGE_IP}:8888/version | jq '. | length'`
+                        if [ "1" != "$res" ]; then
+                        exit 99
+                        fi
+                                                
+                        res=`curl -s -H "Content-Type: application/json" -d '{"text":"ths is a really really really important thing this is"}' http://${STAGE_IP}:8888/api | jq '. | length'`
+                        if [ "7" != "$res" ]; then
+                        exit 99
+                        fi'''
                 }
             }
         }
     }
 }
-        
-    }
-}    

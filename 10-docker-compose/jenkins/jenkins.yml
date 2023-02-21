@@ -4,9 +4,3 @@
   become: yes
   roles:
     - jenkins
-
-  tasks:
-  - name: Install jq
-    apt:
-      name: jq
-      state: present     

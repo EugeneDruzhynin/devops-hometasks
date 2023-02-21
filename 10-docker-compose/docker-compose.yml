@@ -4,11 +4,10 @@ services:
     container_name: nexus
     build:
       context: ./nexus
-      dockerfile: dockerfile-nexus1
+      dockerfile: dockerfile-nexus
     ports:
       - 81:8081
-    networks:
-      - hw-10
+    network_mode: host
 
   jenkins:
     container_name: jenkins
@@ -20,11 +19,10 @@ services:
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - ws:/var/lib/jenkins/workspace/
-    networks:
-      - hw-10
+    network_mode: host
 
 volumes:  
   ws:  
 
-networks:
-  hw-10:
+#networks:
+#  hw-10:
