@@ -4,7 +4,7 @@ services:
     container_name: nexus
     build:
       context: ./nexus
-      dockerfile: dockerfile-nexus1
+      dockerfile: dockerfile-nexus
     ports:
       - 81:8081
     networks:
