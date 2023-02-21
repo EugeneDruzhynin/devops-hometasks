@@ -64,13 +64,16 @@
         stage (&apos;Upload for testing&apos;) {
             agent {
                 dockerfile {
-                    filename &apos;/vagrant/final/dockerfile-alpine&apos;
+                    filename &apos;dockerfile-alpine&apos;
+                    args &apos;--network vagrant_default&apos;
+
                 }
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: &apos;nexus_password&apos;, usernameVariable: &apos;NEXUS_USER&apos;, passwordVariable: &apos;NEXUS_PASSWORD&apos;)]) {
                     sh &apos;&apos;&apos;
-                        curl -u ${NEXUS_USER}:${NEXUS_PASSWORD} -X GET &quot;http://nexus:8081/repository/${NEXUS_REPO}/${BRANCH}/word-cloud-generator/1.${BUILD_NUMBER}/word-cloud-generator-1.${BUILD_NUMBER}.gz&quot;  -o /opt/wordcloud/word-cloud-generator.gz&quot;
+                        curl -u ${NEXUS_USER}:${NEXUS_PASSWORD} -X GET &quot;http://nexus:8081/repository/${NEXUS_REPO}/${BRANCH}/word-cloud-generator/1.${BUILD_NUMBER}/word-cloud-generator-1.${BUILD_NUMBER}.gz&quot;  -o /opt/wordcloud/word-cloud-generator.gz
+                        sleep 10
                         gunzip -f /opt/wordcloud/word-cloud-generator.gz;chmod +x /opt/wordcloud/word-cloud-generator; sudo systemctl start wordcloud
                         sleep 10
                         res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a really really really important thing this is&quot;}&apos; http://alpine:8888/version 
